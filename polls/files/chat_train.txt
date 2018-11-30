@@ -1,0 +1,8 @@
+hello
+hi
+how are you?
+I'm great thanks for asking.
+What about you?
+How does this even work A?
+It works by replying to your query B.
+And it is not randoml chosen B. 

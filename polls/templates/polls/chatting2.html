@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chat theme example</title>
+
+	<style>
+
+	.chatbox {
+		width: 500px;
+		min-width: 390px;
+		height: 1300px;
+		background: #fff;
+		padding: 10px;
+		margin: 0px 50px 900px 900px;
+		box-shadow: 0 3px #ccc;
+	}
+
+
+
+	.chat-form {
+		margin-top: 20px;
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.chat-form textarea {
+		background: #fbfbfb;
+		width: 75%;
+		height: 900px;
+		border: 2px solid #eee;
+		border-radius: 3px;
+		padding: 10px;
+		font-size: 18px;
+		color: #333;
+	}
+
+	.chat-form textarea:focus {
+		background: #fff;
+	}
+
+	.chat-form button {
+		background: #1ddced;
+		padding: 5px 15px;
+		font-size: 30px;
+		color: #fff;
+		border: none;
+		margin: 0 10px;
+		border-radius: 3px;
+		box-shadow: 0 3px 0 #0eb2c1;
+		cursor: pointer;
+
+		-webkit-transaction: background .2s ease;
+		-moz-transaction: backgroud .2s ease;
+		-o-transaction: backgroud .2s ease;
+	}
+
+	.chat-form button:hover {
+		background: #13c8d9;
+	}
+			body {
+		font: 15px arial, sans-serif;
+		background-color: #d9d9d9;
+		padding-top: 0px;
+		padding-bottom: 15px;
+		}
+
+		#bodybox {
+		margin: auto;
+		max-width: 550px;
+		font: 15px arial, sans-serif;
+		background-color: white;
+		border-style: solid;
+		border-width: 1px;
+		padding-top: 0px;
+		padding-bottom: 25px;
+		padding-right: 25px;
+		padding-left: 25px;
+		box-shadow: 5px 5px 5px grey;
+		border-radius: 15px;
+		}
+
+		#chatborder {
+		border-style: solid;
+		background-color: #f6f9f6;
+		border-width: 3px;
+		margin-top: 20px;
+		margin-bottom: 20px;
+		margin-left: 20px;
+		margin-right: 20px;
+		padding-top: 10px;
+		padding-bottom: 15px;
+		padding-right: 20px;
+		padding-left: 15px;
+		border-radius: 15px;
+		}
+
+		.chatlog {
+		font: 15px arial, sans-serif;
+		}
+
+		#chatbox {
+		font: 17px arial, sans-serif;
+		height: 22px;
+		width: 100%;
+		}
+
+		h1 {
+		margin: auto;
+		}
+
+		pre {
+		background-color: #f0f0f0;
+		margin-left: 20px;
+		}
+
+
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+	
+	<div class="chatbox">
+		<h1>Please enter: </h1><p>EMAIL, PASSWORD, FROMMAIL, TOMAIL, SUBJECT TEXT, BODY TEXT</p>
+		<div class="chatlogs">
+			<p id="chatlog7" class="chatlog">&nbsp;</p>
+    		<p id="chatlog6" class="chatlog">&nbsp;</p>
+			<p id="chatlog5" class="chatlog">&nbsp;</p>
+			<p id="chatlog4" class="chatlog">&nbsp;</p>
+			<p id="chatlog3" class="chatlog">&nbsp;</p>
+			<p id="chatlog2" class="chatlog">&nbsp;</p>
+			<p id="chatlog1" class="chatlog">&nbsp;</p>
+			<p id="thinking"></p>
+		</div>
+		<div class="chat-form">
+			
+			<textarea id="textdifang" placeholder="Email address, password, from mail, to mail, subject text, body text"></textarea>
+			<button id="clickme">Send</button>
+		</div>
+
+		<script>
+		var messages = [],
+		UM = "", //keeps track of the most recent input string from the user
+		botMessage = "", //var keeps track of what the chatbot is going to say
+		botName = 'Tom',
+		textbeforesplit = "",
+		textonly = "",
+		talking = true; //name of the chatbot
+	
+
+		$(document).ready(function() {
+			$.ajaxSetup({
+        		headers: { "X-CSRFToken": '{{ csrf_token }}' }
+   			});
+			$("#clickme").click(function() {
+				if (textdifang.value != "") { //if text box isn't blank (FIX THIS SYNTAX)
+					textbeforesplit = textdifang.value; //stores what the user types
+					var UM = textbeforesplit.split(',');
+					textonly = UM.splice(5,999); //this takes out all those after the 5th comma and combine it
+					UM.push(textonly);
+					alert("This is what you will be sending: \n " + UM[UM.length - 1]);
+					textdifang.value = ""; //Resets the textbox
+					messages.push("<p>You: " + UM + "</p>"); //adds the value of the chatbox to the array messages
+					$.ajax({ //Uses AJAX to send message to chatbot
+                		type: 'POST',
+                		url: 'sendamail/', 
+						data: {'USERNAME': UM[0], 'PASSWORD': UM[1], 'FROMMAIL': UM[2], 'TOMAIL': UM[3], 'SUBJECTTEXT':UM[4], 'BODYTEXT':String(UM[5])}, //sends message to chatbot MAYBE CAN SEPERATE IT INTO FIELDS COS ITS NO CHATBOT
+                		success: function(data) { //once reply is received,
+							botMessage = data; //stores reply in botMessge
+                		}
+            		});
+					document.getElementById("thinking").innerHTML = "Thinking...";
+					setTimeout(function(){
+						document.getElementById("thinking").innerHTML = "";
+						messages.push("<b>" + botName + ":</b> " + botMessage); //add bot's message to var messages
+						for (var i = 1; i < 8; i++) {
+							if (messages[messages.length - i]){
+								document.getElementById("chatlog" + i).innerHTML = messages[messages.length - i];
+							}}
+						Speech(botMessage); //reads message
+					},1000);
+					
+					
+				}
+			});
+		});
+
+		function show_image(src, width, height, alt) {
+			var img = document.createElement("img");
+			img.src = src;
+			img.width = width;
+			img.height = height;
+			img.alt = alt;
+			// This next line will just add it to the <body> tag
+			document.body.appendChild(img);
+		}
+
+
+
+
+		function Speech(say) {
+			if ('speechSynthesis' in window && talking) {
+				var utterance = new SpeechSynthesisUtterance(say);
+				//msg.voice = voices[10]; // Note: some voices don't support altering params
+				//msg.voiceURI = 'native';
+				utterance.volume = 1; // 0 to 1
+				utterance.rate = 1.5; // 0.1 to 10
+				utterance.pitch = 1; //0 to 2
+				//utterance.text = 'Hello World';
+				utterance.lang = 'en-US';
+				speechSynthesis.speak(utterance);
+			}
+		}
+		</script>
+
+	
+
+</body>
+</html>
+
