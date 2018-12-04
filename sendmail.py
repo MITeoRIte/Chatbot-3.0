@@ -1,6 +1,8 @@
 import smtplib
 import requests
 from django.http import HttpResponse
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 class sendmailclass():
     def sendmailfunc(user, password, frommail, tomail, subjecttext, bodytext):
@@ -23,6 +25,24 @@ class sendmailclass():
 
         # %s
         # """ % (sent_from, ", ".join(to), subject, body)
+        the_msg = MIMEMultipart("alternative")
+        the_msg['Subject'] = subjecttext
+        the_msg['From'] = frommail
+        the_msg['To'] = tomail
+        html_txt = """\
+        <html>
+            <head></head>
+            <body>
+                <p>Hey! <br>
+                    Testing this mail <b>message</b>. Made by <a href='http://google.com'> Team Google </a>
+                </p>
+            </body>
+        </html>
+        """
+        part_1 = MIMEText(html_txt, "html")
+        the_msg.attach(part_1)
+        print(the_msg.as_string())
+
 
         try:  
             server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
